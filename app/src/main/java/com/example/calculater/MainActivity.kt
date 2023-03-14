@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setupviews()
+        setupViews()
         addCallBacks()
     }
 
@@ -46,7 +46,7 @@ class MainActivity : AppCompatActivity() {
         hexEditText.setText("")
     }
 
-    private fun setupviews(){
+    private fun setupViews(){
         clearButton = findViewById<Button>(R.id.buttonClear)
         decimalEditText = findViewById(R.id.decimal)
         binaryEditText = findViewById(R.id.binaryEditText)
@@ -118,16 +118,16 @@ private fun convertToBase(
 private fun validateInput(s: String, sourceBase: Int):Boolean{
     return when (sourceBase) {
         10 -> {
-            (s!!.matches(Regex("[0-9]+")))
+            (s.matches(Regex("[0-9]+")))
         }
         2 -> {
-            (s!!.matches("[01]+".toRegex()))
-        }
-        16 -> {
-            (s!!.matches(Regex("0[0-7]+")))
+            (s.matches("[01]+".toRegex()))
         }
         8 -> {
-            (s!!.matches(Regex("[0-9A-Fa-f]+")))
+            (s.matches(Regex("[0-7]+")))
+        }
+        16 -> {
+            (s.matches(Regex("[0-9A-Fa-f]+")))
         }
         else -> {
             false
