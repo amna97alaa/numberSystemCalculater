@@ -15,6 +15,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var hexEditText: EditText
     private var focusedEditText :EditText? = null
     private var textWatcher :TextWatcher? = null
+    private lateinit var clearButton :Button
 
 
 
@@ -22,93 +23,75 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Setupviews()
+        setupviews()
+        addCallBacks()
+    }
+
+    private fun addCallBacks(){
         textWatcher = CustomTextWatcher()
         decimalEditText.onFocusChangeListener = CustomFocusListener()
         binaryEditText.onFocusChangeListener = CustomFocusListener()
         octalEditText.onFocusChangeListener = CustomFocusListener()
         hexEditText.onFocusChangeListener = CustomFocusListener()
-
-        val clearButton = findViewById<Button>(R.id.buttonClear)
         clearButton.setOnClickListener {
             // Clear all the text in the EditTexts
-            binaryEditText.setText("")
-            decimalEditText.setText("")
-            octalEditText.setText("")
-            hexEditText.setText("")
-
+            clearInputs()
         }
-
-
     }
 
-    private fun Setupviews(){
+    private fun clearInputs(){
+        binaryEditText.setText("")
+        decimalEditText.setText("")
+        octalEditText.setText("")
+        hexEditText.setText("")
+    }
+
+    private fun setupviews(){
+        clearButton = findViewById<Button>(R.id.buttonClear)
         decimalEditText = findViewById(R.id.decimal)
         binaryEditText = findViewById(R.id.binaryEditText)
         octalEditText = findViewById(R.id.octal)
         hexEditText = findViewById(R.id.hex)
     }
 
-
-
     inner class CustomTextWatcher : TextWatcher{
         override fun beforeTextChanged(
-            s: CharSequence?,
-            start: Int,
-            count: Int,
-            after: Int
-        ) {
-
-        }
+            s: CharSequence?, start: Int, count: Int, after: Int ) {}
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
-
-            when (focusedEditText?.id) {
-                decimalEditText.id -> {
-                    if (s!!.matches(Regex("[0-9]+")) ) {
-                   binaryEditText.setText(convertToBase(s.toString(), 10, 2))
-                    octalEditText.setText(convertToBase(s.toString(), 10, 8))
-                    hexEditText.setText(convertToBase(s.toString(), 10, 16))
-                }
-                }
-
-                octalEditText.id -> {
-                    if (s!!.matches(Regex("0[0-7]+"))) {
-                    binaryEditText.setText(convertToBase(s.toString(),8 , 2))
-                    decimalEditText.setText(convertToBase(s.toString(), 8, 10))
-                    hexEditText.setText(convertToBase(s.toString(), 8, 16))
-                }
-
-                }
-
-
-
-               binaryEditText.id -> {
-                    if (s!!.matches("[01]+".toRegex())) {
-                    decimalEditText.setText(convertToBase(s.toString(), 2, 10))
-                    octalEditText.setText(convertToBase(s.toString(), 2, 8))
-                    hexEditText.setText(convertToBase(s.toString(), 2, 16))
-                }
-
-                }
-
-
-                hexEditText.id -> {
-                    if(s!!.matches(Regex("[0-9A-Fa-f]+"))){
-                    binaryEditText.setText(convertToBase(s.toString(), 16, 2))
-                    decimalEditText.setText(convertToBase(s.toString(), 16, 10))
-                    octalEditText.setText(convertToBase(s.toString(), 16, 8))
-                }
-
-                }
-
-            }
         }
 
         override fun afterTextChanged(s: Editable?) {
+            updateUiState(s.toString())
         }
+        private fun updateUiState(s: String){
+            when (focusedEditText?.id) {
+                decimalEditText.id -> {
+                        binaryEditText.setText(convertToBase(s, 10, 2))
+                        octalEditText.setText(convertToBase(s, 10, 8))
+                        hexEditText.setText(convertToBase(s, 10, 16))
+                    }
 
+                octalEditText.id -> {
+                        binaryEditText.setText(convertToBase(s,8 , 2))
+                        decimalEditText.setText(convertToBase(s, 8, 10))
+                        hexEditText.setText(convertToBase(s, 8, 16))
+                    }
+
+                binaryEditText.id -> {
+                        decimalEditText.setText(convertToBase(s, 2, 10))
+                        octalEditText.setText(convertToBase(s, 2, 8))
+                        hexEditText.setText(convertToBase(s, 2, 16))
+                    }
+
+                hexEditText.id -> {
+                        binaryEditText.setText(convertToBase(s, 16, 2))
+                        decimalEditText.setText(convertToBase(s, 16, 10))
+                        octalEditText.setText(convertToBase(s, 16, 8))
+                    }
+            }
+        }
     }
 
     inner class CustomFocusListener: View.OnFocusChangeListener {
@@ -121,6 +104,7 @@ class MainActivity : AppCompatActivity() {
             focusedEditText?.addTextChangedListener(textWatcher)
 
         }
+
     }
 }
 
@@ -128,6 +112,25 @@ private fun convertToBase(
     input: String,
     sourceBase: Int,
     targetBase: Int) : String {
-    return input.toLong(sourceBase).toString(targetBase)
+    return if(validateInput(input,sourceBase)) input.toLong(sourceBase).toString(targetBase) else ""
 }
 
+private fun validateInput(s: String, sourceBase: Int):Boolean{
+    return when (sourceBase) {
+        10 -> {
+            (s!!.matches(Regex("[0-9]+")))
+        }
+        2 -> {
+            (s!!.matches("[01]+".toRegex()))
+        }
+        16 -> {
+            (s!!.matches(Regex("0[0-7]+")))
+        }
+        8 -> {
+            (s!!.matches(Regex("[0-9A-Fa-f]+")))
+        }
+        else -> {
+            false
+      }
+    }
+}
